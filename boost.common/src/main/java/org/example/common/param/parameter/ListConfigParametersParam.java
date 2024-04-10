@@ -1,4 +1,4 @@
-package org.example.common.param;
+package org.example.common.param.parameter;
 
 import lombok.Data;
 import java.io.Serializable;

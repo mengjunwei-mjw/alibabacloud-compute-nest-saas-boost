@@ -24,7 +24,9 @@ import com.aliyun.oos20190601.models.GetSecretParameterResponseBody;
 import com.aliyun.oos20190601.models.UpdateParameterResponse;
 import com.aliyun.oos20190601.models.UpdateSecretParameterResponse;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.example.common.BaseResult;
 import org.example.common.adapter.OosClient;
@@ -32,14 +34,11 @@ import org.example.common.errorinfo.ErrorInfo;
 import org.example.common.exception.BizException;
 import org.example.common.model.ConfigParameterModel;
 import org.example.common.model.ListConfigParametersModel;
-import org.example.common.param.ListConfigParametersParam;
-import org.example.common.param.UpdateConfigParameterParam;
+
+import org.example.common.param.parameter.ListConfigParametersParam;
+import org.example.common.param.parameter.UpdateConfigParameterParam;
 import org.springframework.stereotype.Component;
 
-import java.util.stream.IntStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 @Component
 @Slf4j
 public class BaseOosHelper {
@@ -145,16 +144,16 @@ public class BaseOosHelper {
         return BaseResult.success(listConfigParametersModel);
     }
 
-    public String getSecretValue(String name) {
+    public String getSecretParameter(String name) {
         try {
             GetSecretParameterResponse response = oosClient.getSecretParameter(name);
             Optional<String> optionalValue = Optional.ofNullable(response)
                     .map(GetSecretParameterResponse::getBody)
                     .map(GetSecretParameterResponseBody::getParameter)
                     .map(GetSecretParameterResponseBody.GetSecretParameterResponseBodyParameter::getValue);
-            return optionalValue.orElseThrow() -> new BizException(ErrorInfo.RESOURCE_NOT_FOUND);
+            return optionalValue.orElseThrow(() -> new BizException(ErrorInfo.RESOURCE_NOT_FOUND));
         } catch (Exception e) {
-            log.error("getSecretValue error", e);
+            log.error("getSecretParameter error", e);
             throw new BizException(ErrorInfo.RESOURCE_NOT_FOUND);
         }
     }

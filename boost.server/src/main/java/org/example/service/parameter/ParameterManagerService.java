@@ -19,11 +19,9 @@ import org.example.common.BaseResult;
 
 import org.example.common.model.ListConfigParametersModel;
 
-import org.example.common.param.ListConfigParametersParam;
-import org.example.common.param.UpdateConfigParameterParam;
+import org.example.common.param.parameter.ListConfigParametersParam;
+import org.example.common.param.parameter.UpdateConfigParameterParam;
 
-
-import javax.validation.Valid;
 
 public interface ParameterManagerService {
 
