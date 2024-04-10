@@ -17,37 +17,34 @@ package org.example.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import javax.annotation.Resource;
 import org.example.common.BaseResult;
-import org.example.common.ListResult;
-import org.example.common.model.MetricDatasModel;
-import org.example.common.model.MetricMetaDataModel;
-import org.example.common.model.UserInfoModel;
-import org.example.common.param.ListMetricsParam;
-import org.example.service.base.CloudMonitorService;
+import org.example.common.model.ListConfigParametersModel;
+import org.example.common.param.parameter.ListConfigParametersParam;
+import org.example.common.param.parameter.UpdateConfigParameterParam;
+import org.example.service.parameter.ParameterManagerService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.annotation.Resource;
-
 @RestController
 @RequestMapping("/api")
-@Api(value="cloudMonitor",tags={"cloudMonitor"})
+@Api(value="parameterManager",tags={"parameterManager"})
 public class ParameterManagerController {
     @Resource
-    private CloudMonitorService cloudMonitorService;
+    private ParameterManagerService parameterManagerService;
 
-    @ApiOperation(value = "获取全部可监控的表单信息", nickname = "listMetricMetaDatas")
-    @RequestMapping(path = "/listMetricMetaDatas",method = RequestMethod.GET)
-    public ListResult<MetricMetaDataModel> listMetricMetaDatas(@ApiIgnore @AuthenticationPrincipal UserInfoModel userInfoModel) {
-        return cloudMonitorService.listMetricMetaDatas();
+    @ApiOperation(value = "根据填报表批量查询参数", nickname = "listConfigParameters")
+    @RequestMapping(path = "/listConfigParameters",method = RequestMethod.GET)
+    public BaseResult<ListConfigParametersModel> listConfigParameters(@ApiIgnore @AuthenticationPrincipal ListConfigParametersParam listConfigParametersParam) {
+        return parameterManagerService.listConfigParameters(listConfigParametersParam);
     }
 
-    @ApiOperation(value = "获取指定表单的监控数据", nickname = "listMetrics")
-    @RequestMapping(path = "/listMetrics",method = RequestMethod.GET)
-    public BaseResult<MetricDatasModel> listMetrics(@ApiIgnore @AuthenticationPrincipal UserInfoModel userInfoModel, ListMetricsParam listMetricsParam) {
-        return cloudMonitorService.listMetrics(userInfoModel, listMetricsParam);
+    @ApiOperation(value = "根据输入的参数名更新参数", nickname = "updateConfigParameter")
+    @RequestMapping(path = "/updateConfigParameter",method = RequestMethod.POST)
+    public BaseResult<Void> updateConfigParameter(@ApiIgnore @AuthenticationPrincipal UpdateConfigParameterParam updateConfigParameterParam) {
+        return parameterManagerService.updateConfigParameter(updateConfigParameterParam);
     }
 }
