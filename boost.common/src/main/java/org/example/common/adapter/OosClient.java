@@ -16,6 +16,12 @@
 package org.example.common.adapter;
 
 
+import com.aliyun.oos20190601.models.CreateParameterResponse;
+import com.aliyun.oos20190601.models.CreateSecretParameterResponse;
+import com.aliyun.oos20190601.models.GetParameterResponse;
+import com.aliyun.oos20190601.models.GetSecretParameterResponse;
+import com.aliyun.oos20190601.models.UpdateParameterResponse;
+import com.aliyun.oos20190601.models.UpdateSecretParameterResponse;
 import org.example.common.config.AliyunConfig;
 
 import java.util.Map;
@@ -25,16 +31,46 @@ public interface OosClient {
     /**
      * Get oos secret parameter
      * @param name name
-     * @return secret parameter
+     * @return GetSecretParameterResponse
      */
-    String getSecretParameter(String name);
+    GetSecretParameterResponse getSecretParameter(String name);
 
     /**
-     * Get secret parameters by path
-     * @param path oos secret parameters path
-     * @return {@link Map}
+     * Get oos secret parameter
+     * @param name name
+     * @return CreateSecretParameterResponse
      */
-    Map<String, String> getSecretParametersByPath(String path);
+    CreateSecretParameterResponse createSecretParameter(String name, String value);
+
+    /**
+     * Update oos parameter
+     * @param name name
+     * @param value value
+     * @return UpdateSecretParameterResponse
+     */
+    UpdateSecretParameterResponse updateSecretParameter(String name, String value);
+
+    /**
+     * Get oos parameter
+     * @param name name
+     * @return GetParameterResponse
+     */
+    GetParameterResponse getParameter(String name);
+
+    /**
+     * Create oos parameter
+     * @param name name
+     * @return CreateParameterResponse
+     */
+    CreateParameterResponse createParameter(String name, String value);
+
+    /**
+     * Update oos parameter
+     * @param name name
+     * @param value value
+     * @return UpdateParameterResponse
+     */
+    UpdateParameterResponse updateParameter(String name, String value);
 
     /**
      * Create oos client by ecs ram role
