@@ -125,9 +125,6 @@ const ServicePage: React.FC = () => {
                     );
                     const alipayAllConfigured = Object.values(alipayConfigMapWithCert).every(value => value !== false) ||
                         Object.values(alipayConfigMapWithKey).every(value => value !== false);
-                    console.info(alipayConfigMapWithKey);
-                    console.info(alipayConfigMapWithCert);
-                    console.info(alipayAllConfigured);
                     dispatch(setAlipayConfigured(alipayAllConfigured));
                     break;
                 case 'wechatPay':

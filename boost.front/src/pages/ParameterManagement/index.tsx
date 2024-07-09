@@ -122,7 +122,7 @@ const ParameterManagement: React.FC = () => {
         ];
         const wechatPayConfigMap = wechatPayRequiredKeys.reduce(
             (map, key) => {
-                const value = alipayPaymentKeys[key];
+                const value = wechatPayPaymentKeys[key];
                 const isValid = value !== undefined && value !== '' && value !== 'waitToConfig';
                 return { ...map, [key]: isValid ? value : false };
             }, {}
