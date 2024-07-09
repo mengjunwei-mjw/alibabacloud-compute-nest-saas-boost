@@ -41,7 +41,7 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
     const [paymentModalVisible, setPaymentModalVisible] = useState(false);
     const [currentOrder, setCurrentOrder] = useState<API.OrderDTO | null>(null);
     const [tradeResult, setTradeResult] = useState<string | null>(null);
-    const [activePaymentMethodKey, setActivePaymentMethodKey] = useState<string>(alipayConfigured? 'ALIPAY' : 'WECHATPAY');
+    const [activePaymentMethodKey, setActivePaymentMethodKey] = useState<string>('ALIPAY');
     const [alipayTradeResult, setAlipayTradeResult] = useState<string | null>(null);
     const [wechatTradeResult, setWechatTradeResult] = useState<string | null>(null);
     const [filterValues, setFilterValues] = useState<{
@@ -198,14 +198,16 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
 
     const handlePaySubmitButton = async (record: any) => {
         setCurrentOrder(record);
-        setActivePaymentMethodKey('ALIPAY');
+        console.info("alipayConfigured:", alipayConfigured);
+        console.info(alipayConfigured? 'ALIPAY' : 'WECHATPAY');
+        setActivePaymentMethodKey(alipayConfigured? 'ALIPAY' : 'WECHATPAY');
         setPaymentModalVisible(true);
     }
 
     useEffect(() => {
         if (currentOrder) {
             (async () => {
-                await handleCreateTransaction('ALIPAY');
+                await handleCreateTransaction(activePaymentMethodKey);
                 setPaymentModalVisible(true);
             })();
         }
