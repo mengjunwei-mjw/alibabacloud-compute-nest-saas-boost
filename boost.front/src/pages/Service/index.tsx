@@ -19,6 +19,7 @@ import {Avatar, Col, message, Row, Spin, Typography} from "antd";
 import styles from "./component/css/service.module.css";
 import {PageContainer} from "@ant-design/pro-layout";
 import {serviceColumns, ServiceModel} from './common';
+import profileImage from '../../../public/logo.png'
 import {GlobalOutlined} from "@ant-design/icons";
 import {FetchResult} from "@/util/nextTokenUtil";
 import {listAllCommodities} from "@/services/backend/commodity";
@@ -69,7 +70,7 @@ const ServicePage: React.FC = () => {
                     let value = configParam.value === 'waitToConfig' ? '' : configParam.value;
                     // 针对 'ProviderLogoUrl' 名称进行特殊处理
                     if (configParam.name === 'ProviderLogoUrl' && configParam.value === 'waitToConfig') {
-                        value = '../../../public/logo.png';
+                        value = profileImage as string;
                     }
                     if (configParam.name === 'ProviderName') {
                         dispatch(setProviderName(value));
@@ -91,8 +92,6 @@ const ServicePage: React.FC = () => {
         const result = await listConfigParameters(listParams);
 
         if (result.data?.length) {
-            console.info(result.data);
-
             const configStatus = result.data.reduce((acc, param) => {
                 if (param.name === 'AlipaySignatureMethod') {
                     if (param.value === 'PrivateKey') {
@@ -126,6 +125,9 @@ const ServicePage: React.FC = () => {
                     );
                     const alipayAllConfigured = Object.values(alipayConfigMapWithCert).every(value => value !== false) ||
                         Object.values(alipayConfigMapWithKey).every(value => value !== false);
+                    console.info(alipayConfigMapWithKey);
+                    console.info(alipayConfigMapWithCert);
+                    console.info(alipayAllConfigured);
                     dispatch(setAlipayConfigured(alipayAllConfigured));
                     break;
                 case 'wechatPay':
@@ -149,11 +151,11 @@ const ServicePage: React.FC = () => {
     const handleRefresh = async () => {
         setRefreshing(true);
         await loadProviderInfo(initialProviderInfoNameList, initialProviderInfoEncryptedList);
+        setRefreshing(false);
         await loadPaymentMethod('alipay', initialPaymentKeysNameList['alipay'],
             initialPaymentKeysEncryptedList['alipay']);
         await loadPaymentMethod('wechatPay', initialPaymentKeysNameList['wechatPay'],
             initialPaymentKeysEncryptedList['wechatPay']);
-        setRefreshing(false);
     };
 
     const providerInfo = useSelector((state: RootState) => ({
