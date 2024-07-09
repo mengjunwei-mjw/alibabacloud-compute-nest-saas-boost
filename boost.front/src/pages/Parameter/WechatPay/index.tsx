@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {WechatPayPaymentKeys} from "@/pages/Parameter/component/interface";
-import { ProForm, ProFormText, ProFormRadio } from '@ant-design/pro-form';
+import { ProForm, ProFormText } from '@ant-design/pro-form';
 import {ActionButtons, CertUploadButton} from "@/pages/Parameter/common";
 
 export const WechatPayPaymentKeyForm: React.FC<{
@@ -36,10 +36,6 @@ export const WechatPayPaymentKeyForm: React.FC<{
         setLocalWechatPayPaymentKeys({ ...localWechatPayPaymentKeys, [key as keyof WechatPayPaymentKeys]: value });
     };
 
-    const handleEnvironmentChange = (key: keyof WechatPayPaymentKeys, value: string) => {
-        setLocalWechatPayPaymentKeys({ ...localWechatPayPaymentKeys, [key]: value });
-    };
-
     const getFieldPropsVisible = (key: keyof WechatPayPaymentKeys, label: string, placeholder: string) => ({
         label: <label style={{ fontWeight: 'bold' }}>{label}</label>,
         placeholder: placeholder,
@@ -73,21 +69,6 @@ export const WechatPayPaymentKeyForm: React.FC<{
                 render: (_) => (<></>),
             }}
         >
-
-            <ProFormRadio.Group
-                name="paymentEnvironment"
-                label={<label style={{ fontWeight: 'bold' }}>支付环境</label>}
-                initialValue='https://api.mch.weixin.qq.com/sandboxnew'
-                options={[
-                    { label: '沙盒环境', value: 'https://api.mch.weixin.qq.com/sandboxnew' },
-                    { label: '正式环境', value: 'https://api.mch.weixin.qq.com' }
-                ]}
-                fieldProps={{
-                    value: localWechatPayPaymentKeys['WechatPayGateway'],
-                    onChange: (e:any) => handleEnvironmentChange("WechatPayGateway", e.target.value),
-                    disabled: !editing,
-                }}
-            />
 
             <ProFormText {...getFieldPropsVisible('WechatPayAppId', '应用ID', '请输入应用ID')} />
             <ProFormText {...getFieldPropsVisible('WechatPayMchId', '商户ID', '请输入商户ID')} />
