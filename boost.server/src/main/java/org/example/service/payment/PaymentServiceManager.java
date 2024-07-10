@@ -62,8 +62,7 @@ public class PaymentServiceManager {
             return payChannelServiceMap.get(PayChannel.ALIPAY.getValue()).verifyTradeCallback(request);
         } else {
             payChannelServiceMap.get(PayChannel.WECHATPAY.getValue()).verifyTradeCallback(request, response);
-//                return WechatPayConstants.VERIFY_SUCCESS_RESULT;
-            return WechatPayConstants.VERIFY_FAIL_RESULT;
+            return WechatPayConstants.VERIFY_SUCCESS_RESULT;
         }
     }
 

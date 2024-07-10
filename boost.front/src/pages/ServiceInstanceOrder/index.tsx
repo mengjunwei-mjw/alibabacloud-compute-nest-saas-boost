@@ -19,13 +19,15 @@ import {createTransaction} from "@/services/backend/payment";
 import {centsToYuan} from "@/util/moneyUtil";
 import {FormattedMessage} from "@@/exports";
 import {PaymentModal} from "@/pages/PaymentMethod";
-import {useSelector} from "react-redux";
-import {RootState} from "@/store/state";
+import {listConfigParameters} from "@/services/backend/parameterManager";
+import {paymentConfiguredEncryptedList, paymentConfiguredNameList} from "@/pages/Parameter/common";
 
 dayjs.extend(utc);
 
 export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
-    const alipayConfigured = useSelector((state: RootState) => state.paymentMethod.alipayConfigured);
+    const [refreshing, setRefreshing] = useState(false);
+    const [alipayAllConfigured, setAlipayAllConfigured] = useState(false);
+    const [wechatPayAllConfigured, setWechatPayAllConfigured] = useState(false);
     const searchParams = getHashSearchParams();
     const initialOrderId = searchParams.get('orderId') || undefined;
     const [orders, setOrders] = useState<API.OrderDTO[]>([]);
@@ -116,6 +118,56 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
             total: 0,
         }
     }
+    useEffect(() => {
+        handleRefresh();
+    }, []);
+
+    const loadPaymentMethod = async (parameterNames: string[], encrypted: boolean[]) => {
+        const configParameterQueryModels = parameterNames.map((name, index) => ({ name, encrypted: encrypted[index] }));
+        const listParams = { configParameterQueryModels };
+        const result = await listConfigParameters(listParams);
+
+        if (result.data?.length) {
+            const configStatus = result.data.reduce((acc, param) => {
+                if (param.name === 'AlipaySignatureMethod') {
+                    if (param.value === 'PrivateKey') {
+                        acc['AlipaySignatureMethodWithKey'] = true;
+                    } else if (param.value === 'Certificate') {
+                        acc['AlipaySignatureMethodWithCert'] = true;
+                    }
+                } else if (param.value !== 'waitToConfig') {
+                    acc[param.name] = true;
+                }
+                return acc;
+            }, {});
+
+            const alipayRequiredKeysWithKey = ['AlipayOfficialPublicKey', 'AlipaySignatureMethodWithKey'];
+            const alipayRequiredKeysWithCert = ['AlipaySignatureMethodWithCert',
+                'AlipayAppCertPath', 'AlipayCertPath', 'AlipayRootCertPath'];
+            const alipayConfigMapWithKey = alipayRequiredKeysWithKey.reduce(
+                (map, key) => ({ ...map, [key]: configStatus[key] ?? false }), {}
+            );
+            const alipayConfigMapWithCert = alipayRequiredKeysWithCert.reduce(
+                (map, key) => ({ ...map, [key]: configStatus[key] ?? false }), {}
+            );
+            const alipayAllConfigured = Object.values(alipayConfigMapWithCert).every(value => value !== false) ||
+                Object.values(alipayConfigMapWithKey).every(value => value !== false);
+            setAlipayAllConfigured(alipayAllConfigured);
+
+            const wechatPayRequiredKeys = ['WechatPayMchSerialNo', 'WechatPayPrivateKeyPath'];
+            const wechatPayConfigMap = wechatPayRequiredKeys.reduce(
+                (map, key) => ({ ...map, [key]: configStatus[key] ?? false }), {}
+            );
+            const wechatPayAllConfigured = Object.values(wechatPayConfigMap).every(value => value !== false);
+            setWechatPayAllConfigured(wechatPayAllConfigured);
+        }
+    };
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await loadPaymentMethod(paymentConfiguredNameList, paymentConfiguredEncryptedList);
+        setRefreshing(false);
+    };
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -198,9 +250,10 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
 
     const handlePaySubmitButton = async (record: any) => {
         setCurrentOrder(record);
-        console.info("alipayConfigured:", alipayConfigured);
-        console.info(alipayConfigured? 'ALIPAY' : 'WECHATPAY');
-        setActivePaymentMethodKey(alipayConfigured? 'ALIPAY' : 'WECHATPAY');
+        console.info("alipayConfigured:", alipayAllConfigured);
+        console.info("wechatPayConfigured:", wechatPayAllConfigured);
+        console.info(alipayAllConfigured? 'ALIPAY' : 'WECHATPAY');
+        setActivePaymentMethodKey(alipayAllConfigured? 'ALIPAY' : 'WECHATPAY');
         setPaymentModalVisible(true);
     }
 
@@ -282,7 +335,7 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
         },
     ])
     return (
-        <PageContainer title={props.serviceInstanceId}>
+        <PageContainer title={props.serviceInstanceId} >
             {(paymentModalVisible && tradeResult) ?
                 // @ts-ignore
                 <PaymentModal
@@ -302,6 +355,7 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
                     setFilterValues(values);
                     actionRef.current?.reload();
                 }}
+                loading={refreshing}
                 actionRef={actionRef}
                 headerTitle={<FormattedMessage id='menu.list.service-instance-order-list'
                                                defaultMessage='服务实例订单列表'/>}

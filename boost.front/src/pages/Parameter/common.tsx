@@ -54,6 +54,11 @@ export const initialPaymentKeysEncryptedList = {
     wechatPay: [false, false, true, true, false, true],
 };
 
+export const paymentConfiguredNameList = ['AlipayOfficialPublicKey', 'AlipaySignatureMethod',
+        'AlipayAppCertPath', 'AlipayCertPath', 'AlipayRootCertPath', 'WechatPayMchSerialNo',
+        'WechatPayPrivateKeyPath'];
+export const paymentConfiguredEncryptedList = [true, false, true, true, true, true, true];
+
 export const encryptedCredentialsMap = {
     'ProviderName': false,
     'ProviderOfficialLink': false,
