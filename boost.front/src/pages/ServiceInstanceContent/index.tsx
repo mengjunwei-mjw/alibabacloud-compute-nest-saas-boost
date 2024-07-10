@@ -39,8 +39,6 @@ import {
 import {getCommodity, getCommodityPrice} from "@/services/backend/commodity";
 import {FormattedMessage} from "@@/exports";
 import {RenewalModal} from "@/pages/PaymentMethod";
-import {useSelector} from "react-redux";
-import {RootState} from "@/store/state";
 
 dayjs.extend(utc);
 const ServiceInstanceContent: React.FC<ServiceInstanceContentProps> = (props) => {
@@ -324,10 +322,10 @@ const ServiceInstanceContent: React.FC<ServiceInstanceContentProps> = (props) =>
 
         return (
             // @ts-ignore
-            <PageContainer title={props.serviceInstanceId}><RenewalModal
+            <PageContainer title={props.serviceInstanceId} >
+                <RenewalModal
                     qrCodeURL={tradeResult? tradeResult : ""}
                     orderAmount={currentOrder?.totalAmount? currentOrder?.totalAmount : -1}
-                    orderNumber={currentOrder?.orderId? currentOrder?.orderId : ""}
                     visible={paymentModalVisible}
                     onClose={() => setPaymentModalVisible(false)}
                     activePaymentMethodKey={activePaymentMethodKey}
@@ -362,7 +360,7 @@ const ServiceInstanceContent: React.FC<ServiceInstanceContentProps> = (props) =>
                         {
                             Object.keys(outputs).map((key) => {
                                 // @ts-ignore
-                                let httpUrl = JSON.stringify(outputs[key]).replace(/\"/g, "");
+                                let httpUrl = JSON.stringify(outputs[key]).replace(/"/g, "");
                                 if (httpUrl.indexOf('http') >= 0 || isIPv4Address(httpUrl)) {
                                     // @ts-ignore
                                     return (<Descriptions.Item label={key}>
@@ -373,7 +371,7 @@ const ServiceInstanceContent: React.FC<ServiceInstanceContentProps> = (props) =>
                                 } else {
                                     return (<Descriptions.Item
                                         // @ts-ignore
-                                        label={key}>{JSON.stringify(outputs[key]).replace(/\"/g, "")}</Descriptions.Item>)
+                                        label={key}>{JSON.stringify(outputs[key]).replace(/"/g, "")}</Descriptions.Item>)
                                 }
                             })
                         }
@@ -398,7 +396,7 @@ const ServiceInstanceContent: React.FC<ServiceInstanceContentProps> = (props) =>
                             Object.keys(parameters).map((key) => {
                                 return (<Descriptions.Item
                                     // @ts-ignore
-                                    label={key}>{JSON.stringify(parameters[key]).replace(/\"/g, "")}</Descriptions.Item>);
+                                    label={key}>{JSON.stringify(parameters[key]).replace(/"/g, "")}</Descriptions.Item>);
                             })
                         }
                     </Descriptions>

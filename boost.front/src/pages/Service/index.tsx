@@ -29,8 +29,6 @@ import {ProColumns, ProTable} from "@ant-design/pro-components";
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from "@/store/state";
 import {
-    initialPaymentKeysEncryptedList,
-    initialPaymentKeysNameList,
     initialProviderInfoEncryptedList,
     initialProviderInfoNameList
 } from "@/pages/Parameter/common";
@@ -42,7 +40,6 @@ import {
     setProviderOfficialLink
 } from "@/store/providerInfo/actions";
 import {FormattedMessage} from "@@/exports";
-import {setAlipayConfigured, setWechatPayConfigured} from "@/store/paymentMethod/actions";
 
 const {Paragraph} = Typography;
 
@@ -86,73 +83,10 @@ const ServicePage: React.FC = () => {
         }
     };
 
-    const loadPaymentMethod = async (paymentMethod: string, parameterNames: string[], encrypted: boolean[]) => {
-        const configParameterQueryModels = parameterNames.map((name, index) => ({ name, encrypted: encrypted[index] }));
-        const listParams = { configParameterQueryModels };
-        const result = await listConfigParameters(listParams);
-
-        if (result.data?.length) {
-            const configStatus = result.data.reduce((acc, param) => {
-                if (param.name === 'AlipaySignatureMethod') {
-                    if (param.value === 'PrivateKey') {
-                        acc['AlipaySignatureMethodWithKey'] = true;
-                    } else if (param.value === 'Certificate') {
-                        acc['AlipaySignatureMethodWithCert'] = true;
-                    }
-                } else if (param.value !== 'waitToConfig') {
-                    acc[param.name] = true;
-                }
-                return acc;
-            }, {});
-
-            switch (paymentMethod) {
-                case 'alipay':
-                    const alipayRequiredKeysWithKey = [
-                        'AlipayAppId', 'AlipayPid',
-                        'AlipayOfficialPublicKey', 'AlipayPrivateKey',
-                        'AlipaySignatureMethodWithKey'
-                    ];
-                    const alipayRequiredKeysWithCert = [
-                        'AlipayAppId', 'AlipayPid',
-                        'AlipayPrivateKey', 'AlipaySignatureMethodWithCert',
-                        'AlipayAppCertPath', 'AlipayCertPath', 'AlipayRootCertPath'
-                    ];
-                    const alipayConfigMapWithKey = alipayRequiredKeysWithKey.reduce(
-                        (map, key) => ({ ...map, [key]: configStatus[key] ?? false }), {}
-                    );
-                    const alipayConfigMapWithCert = alipayRequiredKeysWithCert.reduce(
-                        (map, key) => ({ ...map, [key]: configStatus[key] ?? false }), {}
-                    );
-                    const alipayAllConfigured = Object.values(alipayConfigMapWithCert).every(value => value !== false) ||
-                        Object.values(alipayConfigMapWithKey).every(value => value !== false);
-                    dispatch(setAlipayConfigured(alipayAllConfigured));
-                    break;
-                case 'wechatPay':
-                    const wechatPayRequiredKeys = [
-                        'WechatPayAppId', 'WechatPayMchId',
-                        'WechatPayApiV3Key', 'WechatPayMchSerialNo',
-                        'WechatPayPrivateKeyPath'
-                    ];
-                    const wechatPayConfigMap = wechatPayRequiredKeys.reduce(
-                        (map, key) => ({ ...map, [key]: configStatus[key] ?? false }), {}
-                    );
-                    const wechatPayAllConfigured = Object.values(wechatPayConfigMap).every(value => value !== false);
-                    dispatch(setWechatPayConfigured(wechatPayAllConfigured));
-                    break;
-                default:
-                    console.error(`Unsupported payment method: ${paymentMethod}`);
-            }
-        }
-    };
-
     const handleRefresh = async () => {
         setRefreshing(true);
         await loadProviderInfo(initialProviderInfoNameList, initialProviderInfoEncryptedList);
         setRefreshing(false);
-        await loadPaymentMethod('alipay', initialPaymentKeysNameList['alipay'],
-            initialPaymentKeysEncryptedList['alipay']);
-        await loadPaymentMethod('wechatPay', initialPaymentKeysNameList['wechatPay'],
-            initialPaymentKeysEncryptedList['wechatPay']);
     };
 
     const providerInfo = useSelector((state: RootState) => ({

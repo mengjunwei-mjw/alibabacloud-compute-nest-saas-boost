@@ -13,6 +13,8 @@ interface PaymentModalProps {
     qrCodeURL: string;
     orderAmount: number;
     orderNumber: string;
+    alipayAllConfigured: string;
+    wechatPayAllConfigured: string;
     onClose: () => void;
     visible: boolean;
     activePaymentMethodKey: string;
@@ -22,6 +24,8 @@ interface PaymentModalProps {
 export const PaymentModal: React.FC<PaymentModalProps> = ({    qrCodeURL,
                                                        orderAmount,
                                                        orderNumber,
+                                                       alipayAllConfigured,
+                                                       wechatPayAllConfigured,
                                                        onClose,
                                                        visible,
                                                        activePaymentMethodKey,
@@ -34,8 +38,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({    qrCodeURL,
         description: state.providerInfo.providerDescription,
         logoUrl: state.providerInfo.providerLogoUrl,
     }));
-    const alipayConfigured = useSelector((state: RootState) => state.paymentMethod.alipayConfigured);
-    const wechatPayConfigured = useSelector((state: RootState) => state.paymentMethod.wechatPayConfigured);
+
     const navigate = useNavigate();
 
     const goToServiceInstance = () => {
@@ -69,7 +72,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({    qrCodeURL,
                 <span style={{ fontSize: '16px', fontWeight: 'bold' }}>订单金额: ¥{(orderAmount / 100).toFixed(2)}</span>
             </Row>
 
-            {alipayConfigured && wechatPayConfigured ? (
+            {alipayAllConfigured && wechatPayAllConfigured ? (
                 <ProCard
                     tabs={{
                         type: 'card',
@@ -102,7 +105,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({    qrCodeURL,
 interface RenewalModalProps {
     qrCodeURL: string;
     orderAmount: number;
-    orderNumber: string;
     onClose: () => void;
     visible: boolean;
     activePaymentMethodKey: string;
@@ -110,7 +112,6 @@ interface RenewalModalProps {
 
 export const RenewalModal: React.FC<RenewalModalProps> = ({    qrCodeURL,
                                                        orderAmount,
-                                                       orderNumber,
                                                        onClose,
                                                        visible,
                                                        activePaymentMethodKey

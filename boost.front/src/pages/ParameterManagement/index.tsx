@@ -26,7 +26,6 @@ import {AlipayPaymentKeyForm} from "@/pages/Parameter/Alipay";
 import {WechatPayPaymentKeyForm} from "@/pages/Parameter/WechatPay";
 
 import {FormattedMessage} from "@@/exports";
-import {setAlipayConfigured, setWechatPayConfigured} from "@/store/paymentMethod/actions";
 
 const ParameterManagement: React.FC = () => {
     const [activeTabKey, setActiveTabKey] = useState<string>('ProviderInfo');
@@ -84,52 +83,6 @@ const ParameterManagement: React.FC = () => {
             dispatch(setProviderLogoUrl(providerInfo.ProviderLogoUrl));
         }
     }, [providerInfo, dispatch]);
-
-    useEffect(() => {
-        if (alipayPaymentKeys['AlipaySignatureMethod'] === 'PrivateKey') {
-            const alipayRequiredKeysWithKey = [
-                'AlipayAppId', 'AlipayPid', 'AlipayOfficialPublicKey', 'AlipayPrivateKey',
-            ];
-            const alipayConfigMapWithKey = alipayRequiredKeysWithKey.reduce(
-                (map, key) => {
-                    const value = alipayPaymentKeys[key];
-                    const isValid = value !== undefined && value !== '' && value !== 'waitToConfig';
-                    return { ...map, [key]: isValid ? value : false };
-                }, {}
-            );
-            dispatch(setAlipayConfigured(Object.values(alipayConfigMapWithKey).every(value => value !== false)));
-        } else if (alipayPaymentKeys['AlipaySignatureMethod'] === 'Certificate') {
-            const alipayRequiredKeysWithCert = [
-                'AlipayAppId', 'AlipayPid', 'AlipayPrivateKey', 'AlipayAppCertPath',
-                'AlipayCertPath', 'AlipayRootCertPath'
-            ];
-            const alipayConfigMapWithCert = alipayRequiredKeysWithCert.reduce(
-                (map, key) => {
-                    const value = alipayPaymentKeys[key];
-                    const isValid = value !== undefined && value !== '' && value !== 'waitToConfig';
-                    return { ...map, [key]: isValid ? value : false };
-                }, {}
-            );
-            dispatch(setAlipayConfigured(Object.values(alipayConfigMapWithCert).every(value => value !== false)));
-        }
-    }, [alipayPaymentKeys, dispatch]);
-
-    useEffect(() => {
-        const wechatPayRequiredKeys = [
-            'WechatPayAppId', 'WechatPayMchId',
-            'WechatPayApiV3Key', 'WechatPayMchSerialNo',
-            'WechatPayPrivateKeyPath'
-        ];
-        const wechatPayConfigMap = wechatPayRequiredKeys.reduce(
-            (map, key) => {
-                const value = wechatPayPaymentKeys[key];
-                const isValid = value !== undefined && value !== '' && value !== 'waitToConfig';
-                return { ...map, [key]: isValid ? value : false };
-            }, {}
-        );
-        const wechatPayAllConfigured = Object.values(wechatPayConfigMap).every(value => value !== false);
-        dispatch(setWechatPayConfigured(wechatPayAllConfigured));
-    }, [wechatPayPaymentKeys, dispatch]);
 
     useEffect(() => {
         handleRefresh();
