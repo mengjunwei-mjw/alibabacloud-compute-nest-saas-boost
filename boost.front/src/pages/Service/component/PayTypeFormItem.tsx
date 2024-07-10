@@ -20,10 +20,6 @@ const PayTypeFormItem: React.FC = () => {
         handleRefresh();
     }, []);
 
-    useEffect(() => {
-        handleRefresh();
-    }, []);
-
     const loadPaymentMethod = async (parameterNames: string[], encrypted: boolean[]) => {
         const configParameterQueryModels = parameterNames.map((name, index) => ({ name, encrypted: encrypted[index] }));
         const listParams = { configParameterQueryModels };

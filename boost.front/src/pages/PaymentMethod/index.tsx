@@ -9,7 +9,6 @@ import AlipayModal from "@/pages/PaymentMethod/Alipay";
 import { useNavigate } from 'react-router-dom';
 import {centsToYuan} from "@/util/moneyUtil";
 import {getOrder} from "@/services/backend/order";
-import {TradeStatusEnum} from "@/pages/Order/common";
 
 interface PaymentModalProps {
     qrCodeURL: string;
@@ -51,7 +50,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({    qrCodeURL,
         const interval = setInterval(async () => {
             try {
                 const orderResult = await getOrder({orderId: orderNumber});
-                if(orderResult.code == "200" && orderResult.data?.tradeStatus === TradeStatusEnum.TRADE_SUCCESS) {
+                if(orderResult.code == "200" && orderResult.data?.tradeStatus.toString() === "TRADE_SUCCESS") {
                     message.success('支付成功，即将跳转...');
                     clearInterval(interval);
                     goToServiceInstance();
