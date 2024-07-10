@@ -44,6 +44,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({    qrCodeURL,
     const goToServiceInstance = () => {
         navigate('/serviceInstance');
     };
+
+    console.info(alipayAllConfigured);
+    console.info(wechatPayAllConfigured);
     return (
         <Modal
             title={
@@ -72,7 +75,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({    qrCodeURL,
                 <span style={{ fontSize: '16px', fontWeight: 'bold' }}>订单金额: ¥{(orderAmount / 100).toFixed(2)}</span>
             </Row>
 
-            {alipayAllConfigured && wechatPayAllConfigured ? (
+            {(alipayAllConfigured && wechatPayAllConfigured) ? (
                 <ProCard
                     tabs={{
                         type: 'card',
