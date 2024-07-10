@@ -250,9 +250,6 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
 
     const handlePaySubmitButton = async (record: any) => {
         setCurrentOrder(record);
-        console.info("alipayConfigured:", alipayAllConfigured);
-        console.info("wechatPayConfigured:", wechatPayAllConfigured);
-        console.info(alipayAllConfigured? 'ALIPAY' : 'WECHATPAY');
         setActivePaymentMethodKey(alipayAllConfigured? 'ALIPAY' : 'WECHATPAY');
         setPaymentModalVisible(true);
     }
@@ -340,8 +337,10 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
                 // @ts-ignore
                 <PaymentModal
                     qrCodeURL={tradeResult}
-                    orderAmount={currentOrder?.totalAmount ? currentOrder?.totalAmount : -1}
-                    orderNumber={currentOrder?.orderId ? currentOrder?.orderId : ""}
+                    orderAmount={currentOrder?.totalAmount ? currentOrder?.totalAmount as number : -1}
+                    orderNumber={currentOrder?.orderId ? currentOrder?.orderId as string : ""}
+                    alipayAllConfigured={alipayAllConfigured}
+                    wechatPayAllConfigured={wechatPayAllConfigured}
                     visible={paymentModalVisible}
                     onClose={() => setPaymentModalVisible(false)}
                     activePaymentMethodKey={activePaymentMethodKey}

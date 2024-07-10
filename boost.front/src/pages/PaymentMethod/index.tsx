@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import ProCard from '@ant-design/pro-card';
-import {Avatar, Button, Col, Modal, Row} from 'antd';
+import {Avatar, Col, message, Modal, Row} from 'antd';
 import styles from "@/pages/Service/component/css/service.module.css";
 import {useSelector} from "react-redux";
 import {RootState} from "@/store/state";
@@ -8,13 +8,15 @@ import WechatPayModal from "@/pages/PaymentMethod/WechatPay";
 import AlipayModal from "@/pages/PaymentMethod/Alipay";
 import { useNavigate } from 'react-router-dom';
 import {centsToYuan} from "@/util/moneyUtil";
+import {getOrder} from "@/services/backend/order";
+import {TradeStatusEnum} from "@/pages/Order/common";
 
 interface PaymentModalProps {
     qrCodeURL: string;
     orderAmount: number;
     orderNumber: string;
-    alipayAllConfigured: string;
-    wechatPayAllConfigured: string;
+    alipayAllConfigured: boolean;
+    wechatPayAllConfigured: boolean;
     onClose: () => void;
     visible: boolean;
     activePaymentMethodKey: string;
@@ -45,8 +47,24 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({    qrCodeURL,
         navigate('/serviceInstance');
     };
 
-    console.info(alipayAllConfigured);
-    console.info(wechatPayAllConfigured);
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            try {
+                const orderResult = await getOrder({orderId: orderNumber});
+                if(orderResult.code == "200" && orderResult.data?.tradeStatus === TradeStatusEnum.TRADE_SUCCESS) {
+                    message.success('支付成功，即将跳转...');
+                    clearInterval(interval);
+                    goToServiceInstance();
+                }
+            } catch (error) {
+                message.error('检查支付状态时出错');
+                clearInterval(interval);
+            }
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <Modal
             title={
@@ -95,12 +113,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({    qrCodeURL,
                     {activePaymentMethodKey === 'WECHATPAY'? <WechatPayModal qrCodeURL={qrCodeURL}/>:null}
                 </ProCard>
             )}
-
-            <Row justify="end" style={{ marginTop: '24px' }}>
-                <Button type="primary" onClick={goToServiceInstance}>
-                    已支付
-                </Button>
-            </Row>
         </Modal>
     );
 };
