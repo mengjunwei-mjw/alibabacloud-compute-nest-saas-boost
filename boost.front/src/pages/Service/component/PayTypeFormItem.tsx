@@ -75,11 +75,11 @@ const PayTypeFormItem: React.FC = () => {
         <ProFormRadio.Group
             label={<FormattedMessage id="label.payment-method" defaultMessage="支付方式" />}
             name="payChannel"
+            loading={refreshing}
             initialValue={alipayAllConfigured? "ALIPAY" : "WECHATPAY"}
             rules={[{
                 required: true,
-                message: <FormattedMessage id="message.select-payment-method" defaultMessage="请选择支付方式" />,
-                loading: refreshing,
+                message: <FormattedMessage id="message.select-payment-method" defaultMessage="请选择支付方式" />
             }]}
             options={payTypeEntries.map(([key, value]) => ({
                 label: (
