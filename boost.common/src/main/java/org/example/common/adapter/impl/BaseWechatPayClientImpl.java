@@ -257,12 +257,15 @@ public class BaseWechatPayClientImpl implements BaseWechatPayClient {
             keyPath = String.format("%s/%s/%s", LOCAL_CERT_STORAGE_PATH, PayChannel.WECHATPAY.getDisplayName(),
                     wechatPayConfig.getPrivateKeyPath());
             if (localCertStorageHelper.doesFileExist(keyPath)) {
+                WxPayApiConfigKit.removeApiConfig(wechatPayConfig.getAppId());
                 WxPayApiConfig wxPayApiConfig = WxPayApiConfig.builder()
                         .appId(wechatPayConfig.getAppId())
                         .mchId(wechatPayConfig.getMchId())
                         .apiKey3(wechatPayConfig.getApiV3Key())
                         .keyPath(keyPath)
                         .build();
+                wxPayApiConfig.setAppId(wechatPayConfig.getAppId());
+                WxPayApiConfigKit.setThreadLocalAppId(wechatPayConfig.getAppId());
                 WxPayApiConfigKit.setThreadLocalWxPayApiConfig(wxPayApiConfig);
 
                 PrivateKey privateKey = getPrivateKey(keyPath);
