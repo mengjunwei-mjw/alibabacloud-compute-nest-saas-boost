@@ -28,6 +28,7 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
     const [refreshing, setRefreshing] = useState(false);
     const [alipayAllConfigured, setAlipayAllConfigured] = useState(false);
     const [wechatPayAllConfigured, setWechatPayAllConfigured] = useState(false);
+    const [paymentAllConfigured, setPaymentAllConfigured] = useState(false);
     const searchParams = getHashSearchParams();
     const initialOrderId = searchParams.get('orderId') || undefined;
     const [orders, setOrders] = useState<API.OrderDTO[]>([]);
@@ -90,34 +91,51 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
             param.endTime = utcTime;
         }
         console.log(param);
-        const result: API.ListResultOrderDTO_ = await listOrders(param);
 
-        if (result.data !== undefined) {
-            setTotal(result.count || 0);
-            setOrders(result.data || []);
-            nextTokens[currentPage] = result.nextToken;
-            const transformedData = result.data?.map((item: API.OrderDTO, index) => {
-                const localTime = item.gmtCreate ? moment.utc(item.gmtCreate).local().format('YYYY-MM-DD HH:mm:ss') : '';
+        const maxRetries = 3;
+        let attempt = 0;
+        let result: API.ListResultOrderDTO_;
+
+        while (attempt < maxRetries) {
+            result = await listOrders(param);
+
+            if (result.data !== undefined) {
+                setTotal(result.count || 0);
+                setOrders(result.data || []);
+                if (initialOrderId && tradeResult == null) {
+                    await handlePaySubmitButton(result.data.find((order: API.OrderDTO) => order.orderId === initialOrderId));
+                }
+                nextTokens[params.current] = result.nextToken;
+                const transformedData = result.data?.map((item: API.OrderDTO) => {
+                    const localTime = item.gmtCreate ? moment.utc(item.gmtCreate).local().format('YYYY-MM-DD HH:mm:ss') : '';
+                    return {
+                        ...item,
+                        gmtCreate: localTime,
+                        tradeStatus: TradeStatusEnum[item.tradeStatus as keyof typeof TradeStatusEnum],
+                        type: PayChannelEnum[item.payChannel as keyof typeof PayChannelEnum],
+                    };
+                }) || [];
+
                 return {
-                    ...item,
-                    gmtCreate: localTime,
-                    tradeStatus: TradeStatusEnum[item.tradeStatus as keyof typeof TradeStatusEnum],
-                    type: PayChannelEnum[item.payChannel as keyof typeof PayChannelEnum],
+                    data: transformedData,
+                    success: true,
+                    total: result.count || 0,
                 };
-            }) || [];
-            return {
-                //@ts-ignored
-                data: transformedData,
-                success: true,
-                total: result.count || 0,
-            };
+            } else {
+                attempt++;
+                console.log(`Failed to fetch orders, attempt ${attempt}`);
+                if (attempt < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Delay for 1 second
+                }
+            }
         }
+
         return {
             data: [],
-            success: true,
+            success: false,
             total: 0,
-        }
-    }
+        };
+    };
     useEffect(() => {
         handleRefresh();
     }, []);
@@ -167,17 +185,8 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
         setRefreshing(true);
         await loadPaymentMethod(paymentConfiguredNameList, paymentConfiguredEncryptedList);
         setRefreshing(false);
+        setPaymentAllConfigured(true);
     };
-
-    useEffect(() => {
-        const fetchOrders = async () => {
-            const result: API.ListResultOrderDTO_ = await listOrders({
-                orderId: initialOrderId
-            });
-        };
-        fetchOrders();
-
-    }, [initialOrderId]);
 
     const handleConfirmRefund = async (): Promise<void> => {
         try {
@@ -258,7 +267,6 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
         if (currentOrder) {
             (async () => {
                 await handleCreateTransaction(activePaymentMethodKey);
-                setPaymentModalVisible(true);
             })();
         }
     }, [currentOrder]);
@@ -332,7 +340,7 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
         },
     ])
     return (
-        <PageContainer title={props.serviceInstanceId} >
+        <PageContainer title={props.serviceInstanceId} loading={refreshing}>
             {(paymentModalVisible && tradeResult) ?
                 // @ts-ignore
                 <PaymentModal
@@ -348,7 +356,7 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
                 >
                 </PaymentModal> : null}
 
-            <ProTable
+            {paymentAllConfigured ? <ProTable
                 onSubmit={(values) => {
                     // @ts-ignore
                     setFilterValues(values);
@@ -382,8 +390,8 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
                 }}
                 columns={columns}
                 request={fetchOrders}
-                rowKey="key" pagination={false}/>
-            <Pagination
+                rowKey="key" pagination={false}/> : null}
+            {paymentAllConfigured ? <Pagination
                 style={{marginTop: '16px', textAlign: 'right'}}
                 current={currentPage}
                 pageSize={pageSize}
@@ -392,7 +400,7 @@ export const Index: React.FC<ServiceInstanceOrderProps> = (props) => {
                     handleGoToPage(page, currentPage, total, fetchOrders, setCurrentPage, actionRef, pageSize);
                 }}
                 showSizeChanger={false}
-            />
+            /> : null}
         </PageContainer>
     );
 }
